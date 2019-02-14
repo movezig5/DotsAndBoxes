@@ -3,21 +3,28 @@ package dataStructures;
 import java.util.Random;
 import java.util.LinkedList;
 import enums.Error;
+import enums.NodeType;
 
 public class Node {
 	private int[][] data;
-	private int scoreOne;
-	private int scoreTwo;
+	private int maxScore;
+	private int minScore;
+	public int value;
+	public int depth;
 	public Node parent;
 	public LinkedList<Node> children;
+	public NodeType type;
 	
 	public Node()
 	{
 		data = new int[9][9];
-		scoreOne = 0;
-		scoreTwo = 0;
+		maxScore = 0;
+		minScore = 0;
+		value = 0;
+		depth = 0;
 		parent = null;
 		children = new LinkedList<Node>();
+		type = null;
 		initialize();
 	}
 	
@@ -25,20 +32,26 @@ public class Node {
 	{
 		int xy = (dim * 2) + 1;
 		data = new int[xy][xy];
-		scoreOne = 0;
-		scoreTwo = 0;
+		maxScore = 0;
+		minScore = 0;
+		value = 0;
+		depth = 0;
 		parent = null;
 		children = new LinkedList<Node>();
+		type = null;
 		initialize();
 	}
 	
 	public Node(int rows, int cols)
 	{
 		data = new int[(rows * 2) + 1][(cols * 2) + 1];
-		scoreOne = 0;
-		scoreTwo = 0;
+		maxScore = 0;
+		minScore = 0;
+		value = 0;
+		depth = 0;
 		parent = null;
 		children = new LinkedList<Node>();
+		type = null;
 		initialize();
 	}
 	
@@ -52,10 +65,13 @@ public class Node {
 				data[i][j] = inNode.data[i][j];
 			}
 		}
-		scoreOne = inNode.scoreOne;
-		scoreTwo = inNode.scoreTwo;
+		maxScore = inNode.maxScore;
+		minScore = inNode.minScore;
+		value = inNode.value;
+		depth = 0;
 		parent = null;
 		children = new LinkedList<Node>();
+		type = inNode.type;
 	}
 	
 	public Error copyTo(Node out)
@@ -70,14 +86,17 @@ public class Node {
 				out.data[i][j] = data[i][j];
 			}
 		}
-		out.scoreOne = scoreOne;
-		out.scoreTwo = scoreTwo;
+		out.maxScore = maxScore;
+		out.minScore = minScore;
+		out.value = value;
+		out.depth = 0;
 		out.parent = null;
 		out.children = new LinkedList<Node>();
+		out.type = type;
 		return Error.SUCCESS;
 	}
 	
-	public Error makeMove(int row, int col, int player, Node outNode)
+	public Error makeMove(int row, int col, Node outNode)
 	{
 		if(row > data.length || col > data[0].length)
 			return Error.OUT_OF_BOUNDS;
@@ -87,8 +106,13 @@ public class Node {
 			if(data[row][col] < 1)
 			{
 				copyTo(outNode);
+				if(type == NodeType.MAX)
+					outNode.type = NodeType.MIN;
+				else
+					outNode.type = NodeType.MAX;
 				outNode.data[row][col] = 1;
-				outNode.updateScore(row, col, player);
+				outNode.updateScore(row, col);
+				
 				return Error.SUCCESS;
 			}
 			else
@@ -104,7 +128,7 @@ public class Node {
 	
 	public int eval()
 	{
-		return scoreOne - scoreTwo;
+		return maxScore - minScore;
 	}
 	
 	public void initialize()
@@ -136,7 +160,7 @@ public class Node {
 		}
 	}
 	
-	private void updateScore(int row, int col, int player)
+	private void updateScore(int row, int col)
 	{
 		int score = 0;
 		if(row % 2 != 0 || col % 2 != 0)
@@ -160,10 +184,10 @@ public class Node {
 					score += data[row][right];
 			}
 		}
-		if(player == 1)
-			scoreOne += score;
-		if(player == 2)
-			scoreTwo += score;
+		if(type == NodeType.MAX)
+			maxScore += score;
+		if(type == NodeType.MIN)
+			minScore += score;
 	}
 	
 	private boolean isSurrounded(int row, int col)
@@ -181,6 +205,37 @@ public class Node {
 				return false;
 		}
 		return false;
+	}
+	
+	public void getChildren()
+	{
+		for(int row = 0; row < data.length; row++)
+		{
+			for(int col = 0; col < data[row].length; col++)
+			{
+				if(((row % 2 == 0 && col % 2 == 1) || (row % 2 == 1 && col % 2 == 0)) && data[row][col] < 1)
+				{
+					Node child = new Node(this);
+					makeMove(row, col, child);
+					child.parent = this;
+					child.depth = depth + 1;
+					children.add(child);
+				}
+			}
+		}
+	}
+	
+	public boolean isOver()
+	{
+		for(int row = 0; row < data.length; row++)
+		{
+			for(int col = 0; col < data[row].length; col++)
+			{
+				if(((row % 2 == 0 && col % 2 == 1) || (row % 2 == 1 && col % 2 == 0)) && data[row][col] < 1)
+					return false;
+			}
+		}
+		return true;
 	}
 	
 	public void printNode()
@@ -233,7 +288,7 @@ public class Node {
 				System.out.print("\n");
 			}
 		}
-		System.out.println("Player 1 Score: " + scoreOne);
-		System.out.println("Player 2 Score: " + scoreTwo);
+		System.out.println("Player 1 Score: " + maxScore);
+		System.out.println("Player 2 Score: " + minScore);
 	}
 }
