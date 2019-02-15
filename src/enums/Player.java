@@ -1,6 +1,6 @@
 package enums;
 
-public enum NodeType {
+public enum Player {
 	MAX,
 	MIN
 }
