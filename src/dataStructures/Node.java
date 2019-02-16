@@ -373,7 +373,7 @@ public class Node {
 				for(int col = 0; col < grid[row].length; col++)
 				{
 					if(col % 2 == 0)
-						System.out.print("•");
+						System.out.print("*");
 					else if(grid[row][col] > 0)
 						System.out.print("───");
 					else
