@@ -128,15 +128,32 @@ public class DotsAndBoxes {
 			do {
 				System.out.print("Player's move: ");
 				moveStr = s.nextLine().split(",");
-				for(int i = 0; i < 2; i++)
-					move[i] = Integer.parseInt(moveStr[i].trim());
-				result = root.makeMove(move[1], move[0]);
+				result = Error.SUCCESS;
+				if(moveStr.length < 2)
+				{
+					System.out.println("That move is invalid. Please enter the desired move in <row>,<column> format.");
+					result = Error.INVALID_NUMBER;
+				} else
+				{
+					for(int i = 0; i < 2; i++)
+					{
+						try {
+							move[i] = Integer.parseInt(moveStr[i]);
+						} catch (NumberFormatException e)
+						{
+							System.out.println("That move is invalid. Please enter the desired move in <row>,<column> format.");
+							result = Error.INVALID_NUMBER;
+						}
+					}
+				}
+				if(result != Error.INVALID_NUMBER)
+					result = root.makeMove(move[1], move[0]);
 				if(result == Error.INVALID_SPACE)
-					System.out.println("\nYou cannot draw a line there.");
+					System.out.println("You cannot draw a line there.");
 				if(result == Error.OUT_OF_BOUNDS)
-					System.out.println("\nThat coordinate is outside the boundaries of the grid.");
+					System.out.println("That coordinate is outside the boundaries of the grid.");
 				if(result == Error.SPACE_FILLED)
-					System.out.println("\nThat space already has a line drawn in it.");
+					System.out.println("That space already has a line drawn in it.");
 			} while (result != Error.SUCCESS);
 			System.out.print("\n");
 			root.printNode();
