@@ -398,4 +398,9 @@ public class Node {
 		System.out.println("Player: " + minScore);
 		System.out.println("Computer: " + maxScore + "\n");
 	}
+	
+	public int gridVal(int row, int col)
+	{
+		return grid[row][col];
+	}
 }

@@ -26,7 +26,7 @@ public class MinMax {
 	{
 		int coords[] = {0, 0};
 		Node root = new Node(node);
-		int best = minMax(root, numPlys, Integer.MAX_VALUE, Integer.MIN_VALUE);
+		int best = minMax(root, numPlys, Integer.MIN_VALUE, Integer.MAX_VALUE);
 		for(Node n : root.children)
 		{
 			if(n.val == best)
@@ -53,7 +53,7 @@ public class MinMax {
 	private static int minMax(Node root, int plys, int alpha, int beta)
 	{
 		root.addChildren();
-		if(root.children.isEmpty() || root.depth >= plys)
+		if(root.depth >= plys || root.children.isEmpty())
 		{
 			root.eval();
 			return root.val;
@@ -65,8 +65,10 @@ public class MinMax {
 			for(Node n : root.children)
 			{
 				value = minMax(n, plys - 1, alpha, beta);
-				bestVal = Integer.max(bestVal, value);
-				alpha = Integer.max(alpha, bestVal);
+				if(value > bestVal)
+					bestVal = value;
+				if(bestVal > alpha)
+					alpha = bestVal;
 				if(beta <= alpha)
 					break;
 			}
@@ -80,8 +82,10 @@ public class MinMax {
 			for(Node n : root.children)
 			{
 				value = minMax(n, plys - 1, alpha, beta);
-				bestVal = Integer.min(bestVal, value);
-				beta = Integer.min(beta, bestVal);
+				if(value < bestVal)
+					bestVal = value;
+				if(bestVal < beta)
+					beta = bestVal;
 				if(beta <= alpha)
 					break;
 			}
