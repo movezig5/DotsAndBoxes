@@ -7,7 +7,24 @@ import dataStructures.Node;
 import enums.Error;
 import enums.Player;
 
+/* *******************
+ * Class: DotsAndBoxes
+ * *******************
+ * Description:
+ * 		The starting class of the program. Contains the main method.
+ * Variables: none
+ */
 public class DotsAndBoxes {
+	// main
+	// The main method of the program. Collects user input and executes the game loop,
+	// alternately getting the player's next move and determining the computer's next move.
+	// The player can specify the dimensions of the grid, the number of plys used in the
+	// min/max algorithm, and who goes first (player, computer, or choose randomly).
+	// At the end of the game, the program will display the final score and announce the winner.
+	// The program exits after a single game. The user must run the program again to play again.
+	// Arguments:
+	//		args: Arguments to the program. Not used.
+	// Returns: none
 	public static void main(String[] args)
 	{
 		Scanner s = new Scanner(System.in);
@@ -18,9 +35,8 @@ public class DotsAndBoxes {
 		int numPlys = 0;
 		int playerSelection = 0;
 		Player starting;
-		Node state;
+		Node root;
 		int[] move = new int[2];
-		//String input = "";
 		String[] moveStr;
 		Error result;
 		while(width == 0)
@@ -92,29 +108,29 @@ public class DotsAndBoxes {
 				starting = Player.MAX;
 		}
 		
-		state = new Node(height, width, starting);
+		root = new Node(height, width, starting);
 		
 		System.out.println("Please enter the coordinates of your moves in column, row order."
 				+ "\nCoordinates should be separated by a comma.\n");
 		
-		state.printNode();
+		root.printNode();
 		
 		if(starting == Player.MAX) {
 			System.out.print("Computer's move: ");
-			move = MinMax.makeMove(state, numPlys);
+			move = MinMax.makeMove(root, numPlys);
 			System.out.println(move[1] + "," + move[0]);
-			state.makeMove(move[0], move[1]);
-			state.printNode();
+			root.makeMove(move[0], move[1]);
+			root.printNode();
 		}
 		
-		while(!state.isOver())
+		while(!root.isOver())
 		{
 			do {
 				System.out.print("Player's move: ");
 				moveStr = s.nextLine().split(",");
 				for(int i = 0; i < 2; i++)
 					move[i] = Integer.parseInt(moveStr[i].trim());
-				result = state.makeMove(move[1], move[0]);
+				result = root.makeMove(move[1], move[0]);
 				if(result == Error.INVALID_SPACE)
 					System.out.println("\nYou cannot draw a line there.");
 				if(result == Error.OUT_OF_BOUNDS)
@@ -123,23 +139,23 @@ public class DotsAndBoxes {
 					System.out.println("\nThat space already has a line drawn in it.");
 			} while (result != Error.SUCCESS);
 			System.out.print("\n");
-			state.printNode();
-			if(!state.isOver())
+			root.printNode();
+			if(!root.isOver())
 			{
 				System.out.print("Computer's move: ");
-				move = MinMax.makeMove(state, numPlys);
+				move = MinMax.makeMove(root, numPlys);
 				System.out.println(move[1] + "," + move[0]);
-				state.makeMove(move[0], move[1]);
-				state.printNode();
+				root.makeMove(move[0], move[1]);
+				root.printNode();
 			}
 		}
 		
 		System.out.println("-------------\nFinal results\n-------------");
-		System.out.println("Player score: " + state.getMinScore());
-		System.out.println("Computer score: " + state.getMaxScore());
-		if(state.getMaxScore() > state.getMinScore())
+		System.out.println("Player score: " + root.getMinScore());
+		System.out.println("Computer score: " + root.getMaxScore());
+		if(root.getMaxScore() > root.getMinScore())
 			System.out.println("Winner: Computer");
-		else if(state.getMinScore() > state.getMaxScore())
+		else if(root.getMinScore() > root.getMaxScore())
 			System.out.println("Winner: Player");
 		else
 			System.out.println("The game is a draw.");

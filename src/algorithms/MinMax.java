@@ -1,76 +1,92 @@
 package algorithms;
 
-import java.util.LinkedList;
 import dataStructures.Node;
 import enums.Player;
 
+/* *************
+ * Class: MinMax
+ * *************
+ * Description:
+ * 		A class that executes the min/max (or minimax) algorithm with alpha-beta pruning.
+ * 		Contains only static methods.
+ * Variables: none
+ */
 public class MinMax {
-	public static int[] makeMove(Node inNode, int plys)
+	// makeMove
+	// A method that makes the initial call to the min/max algorithm.
+	// Uses the return value of that algorithm to select the best move
+	// from among its children nodes.
+	// Arguments:
+	//		node:		The node from which to make the move
+	//		numPlys:	The number of plys (or depth) to look forward by
+	// Returns:
+	//		An array of two integers representing the row and column of the computer's next move.
+	//		The first element represents the row and the second represents the column.
+	public static int[] makeMove(Node node, int numPlys)
 	{
-		int[] coords = {0, 0};
-		Node root = new Node(inNode);
-		LinkedList<Node> queue = new LinkedList<Node>();
-		LinkedList<Node> children = new LinkedList<Node>();
-		Node currNode;
-		queue.push(root);
-		while(!queue.isEmpty())
-		{
-			currNode = queue.pop();
-			if(currNode.depth < plys)
-			{
-				currNode.addChildren();
-				for(Node n : currNode.children)
-					queue.add(n);
-			}
-			else
-			{
-				children.add(currNode);
-			}
-		}
-		for(Node n : children)
-		{
-			n.eval();
-		}
-		
-		LinkedList<Node> parents = new LinkedList<Node>();
-		
-		if(children.isEmpty())
-			children.push(root);
-		
-		while(children.getFirst() != root)
-		{
-			for(Node n : children)
-			{
-				if(!parents.contains(n.parent))
-					parents.add(n.parent);
-				
-				if(n.getType() == Player.MIN && n.val > n.parent.val)
-					n.parent.val = n.val;
-				if(n.getType() == Player.MAX && n.val < n.parent.val)
-					n.parent.val = n.val;
-				
-				children.clear();
-				children.addAll(parents);
-				parents.clear();
-			}
-		}
-		
-		if(!root.children.isEmpty())
-		{
-			coords[0] = root.children.getFirst().getChangedRow();
-			coords[1] = root.children.getFirst().getChangedCol();
-		}
-		
+		int coords[] = {0, 0};
+		Node root = new Node(node);
+		int best = minMax(root, numPlys, Integer.MAX_VALUE, Integer.MIN_VALUE);
 		for(Node n : root.children)
 		{
-			if(n.val > root.val)
+			if(n.val == best)
 			{
-				root.val = n.val;
 				coords[0] = n.getChangedRow();
 				coords[1] = n.getChangedCol();
+				return coords;
 			}
 		}
-		
 		return coords;
+	}
+	
+	// minMax
+	// A recursive method that executes the min/max algorithm with alpha-beta pruning.
+	// While it was possible to do this non-recursively without alpha-beta pruning,
+	// it is too complicated when alpha-beta pruning is used.
+	// Arguments:
+	//		root:	The root node to construct the search tree from
+	//		plys:	The number of plys to use (i.e. the number of moves to look ahead by)
+	//		alpha:	The "alpha" value, or highest value found so far
+	//		beta:	The "beta" value, or lowest value found so far
+	// Returns:
+	//		The "val" variable of the node representing the best move from the current node. 
+	private static int minMax(Node root, int plys, int alpha, int beta)
+	{
+		root.addChildren();
+		if(root.children.isEmpty() || root.depth >= plys)
+		{
+			root.eval();
+			return root.val;
+		}
+		if(root.getType() == Player.MAX)
+		{
+			int bestVal = Integer.MIN_VALUE;
+			int value;
+			for(Node n : root.children)
+			{
+				value = minMax(n, plys - 1, alpha, beta);
+				bestVal = Integer.max(bestVal, value);
+				alpha = Integer.max(alpha, bestVal);
+				if(beta <= alpha)
+					break;
+			}
+			root.val = bestVal;
+			return bestVal;
+		}
+		else
+		{
+			int bestVal = Integer.MAX_VALUE;
+			int value;
+			for(Node n : root.children)
+			{
+				value = minMax(n, plys - 1, alpha, beta);
+				bestVal = Integer.min(bestVal, value);
+				beta = Integer.min(beta, bestVal);
+				if(beta <= alpha)
+					break;
+			}
+			root.val = bestVal;
+			return bestVal;
+		}
 	}
 }
